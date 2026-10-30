@@ -7,7 +7,7 @@
  *
  * The theme loads this module in the browser after the page has rendered, so there is no space
  * held for the award: it opens vertically into place (a grid row from 0fr to 1fr), then the
- * medal pops in and a shine crosses the card. Reduced-motion users get it without animation.
+ * medal pops in. Reduced-motion users get it without animation.
  */
 const CSS = `
 .cn-award {
@@ -24,7 +24,6 @@ const CSS = `
 .cn-award-card {
   --cn-award-dot-a: rgb(232 182 76 / 0.7);
   --cn-award-dot-b: color-mix(in oklab, var(--cn-award-primary) 30%, transparent);
-  --cn-award-shine: rgb(255 255 255 / 0.7);
   position: relative;
   isolation: isolate;
   overflow: hidden;
@@ -35,21 +34,16 @@ const CSS = `
   border-radius: var(--radius, 0.625rem);
   border: 1px solid color-mix(in oklab, var(--cn-award-primary) 16%, transparent);
   color: var(--foreground, #0d2443);
-  background:
-    radial-gradient(120% 160% at 100% 100%, color-mix(in oklab, var(--cn-award-gold) 14%, transparent) 0%, transparent 60%),
-    linear-gradient(135deg, color-mix(in oklab, var(--cn-award-primary) 7%, #fff), color-mix(in oklab, var(--cn-award-primary) 3%, #fff));
+  background: color-mix(in oklab, var(--cn-award-primary) 5%, #fff);
   animation: cn-award-rise 600ms 120ms cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 /* dark pages: the card in the site color */
 .dark .cn-award-card {
   --cn-award-dot-a: rgb(232 182 76 / 0.55);
   --cn-award-dot-b: rgb(255 255 255 / 0.3);
-  --cn-award-shine: rgb(255 255 255 / 0.16);
   border-color: color-mix(in oklab, var(--cn-award-gold) 35%, transparent);
   color: #fff;
-  background:
-    radial-gradient(120% 160% at 0% 0%, color-mix(in oklab, var(--cn-award-primary) 75%, #fff) 0%, transparent 55%),
-    linear-gradient(135deg, var(--cn-award-primary), color-mix(in oklab, var(--cn-award-primary) 80%, #000));
+  background: var(--cn-award-primary);
 }
 /* scattered confetti on the right of the card */
 .cn-award-card::before {
@@ -66,30 +60,12 @@ const CSS = `
     radial-gradient(circle at 83% 88%, var(--cn-award-dot-b) 0 1px, transparent 2px),
     radial-gradient(circle at 64% 14%, var(--cn-award-dot-b) 0 1px, transparent 2px);
 }
-/* one shine across the card once it has opened */
-.cn-award-card::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  background: linear-gradient(105deg, transparent 35%, var(--cn-award-shine) 50%, transparent 65%);
-  transform: translateX(-100%);
-  animation: cn-award-shine 1100ms 700ms ease-in-out both;
-}
 .cn-award-medal {
   position: relative;
   flex: none;
   width: 52px;
   height: 60px;
   animation: cn-award-pop 520ms 420ms cubic-bezier(0.34, 1.56, 0.64, 1) both;
-}
-.cn-award-medal::before {
-  content: '';
-  position: absolute;
-  inset: 8px -10px -6px;
-  border-radius: 9999px;
-  background: radial-gradient(closest-side, rgb(232 182 76 / 0.45), transparent);
-  z-index: -1;
 }
 .cn-award-medal svg { display: block; width: 100%; height: 100%; overflow: visible; }
 .cn-award-strap-a { fill: var(--cn-award-primary); }
@@ -145,10 +121,6 @@ const CSS = `
   from { transform: scale(0.4) rotate(-18deg); opacity: 0; }
   to { transform: none; opacity: 1; }
 }
-@keyframes cn-award-shine {
-  from { transform: translateX(-100%); }
-  to { transform: translateX(100%); }
-}
 @keyframes cn-award-twinkle {
   0% { transform: scale(0) rotate(0deg); opacity: 0; }
   50% { transform: scale(1.25) rotate(45deg); opacity: 1; }
@@ -156,7 +128,6 @@ const CSS = `
 }
 @media (prefers-reduced-motion: reduce) {
   .cn-award, .cn-award-card, .cn-award-medal, .cn-award-sparkle { animation: none; }
-  .cn-award-card::after { display: none; }
 }
 `;
 
@@ -167,27 +138,15 @@ const SPARKLES = [
 ];
 
 export default function ASTRenderer({ React, ASTComponent }) {
-  const { createElement: h, useId } = React;
+  const { createElement: h } = React;
 
   function Medal() {
-    const id = `cn-award-${useId().replace(/[^a-zA-Z0-9_-]/g, '')}`;
     return h(
       'svg',
       { viewBox: '0 0 48 56', 'aria-hidden': true },
-      h(
-        'defs',
-        null,
-        h(
-          'linearGradient',
-          { id, x1: '0', y1: '0', x2: '1', y2: '1' },
-          h('stop', { offset: '0%', stopColor: '#fbe39a' }),
-          h('stop', { offset: '55%', stopColor: '#e8b64c' }),
-          h('stop', { offset: '100%', stopColor: '#c58a22' }),
-        ),
-      ),
       h('polygon', { className: 'cn-award-strap-a', points: '11,2 19,2 27,24 19,24' }),
       h('polygon', { className: 'cn-award-strap-b', points: '37,2 29,2 21,24 29,24' }),
-      h('circle', { cx: 24, cy: 38, r: 15, fill: `url(#${id})` }),
+      h('circle', { cx: 24, cy: 38, r: 15, fill: '#e8b64c' }),
       h('circle', {
         cx: 24,
         cy: 38,
