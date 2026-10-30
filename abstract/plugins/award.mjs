@@ -4,8 +4,12 @@
  *   :::{award} Best Student Presentation
  *   :recipient: Johnathan Kuttai
  *   :event: AEM 2026, 9th International Airborne Electromagnetics Workshop
+ *   :url: https://example.org/awards
  *   Optional extra text, in MyST.
  *   :::
+ *
+ * With `url`, the whole card links to that page: a full URL opens in a new tab, and a relative
+ * path (such as `/videos`) is a link within the site.
  *
  * Site render plugins load in the browser, after the page has rendered. Until then the theme
  * draws an unknown node by printing its `children`, so the body lives on `content` instead:
@@ -18,6 +22,10 @@ const awardDirective = {
   options: {
     recipient: { type: String, doc: 'Who received it.' },
     event: { type: String, doc: 'Where or when it was awarded.' },
+    url: {
+      type: String,
+      doc: 'A page about the award. A full URL opens in a new tab; a relative path stays in the site.',
+    },
   },
   body: { type: 'myst', doc: 'Optional extra text.' },
   run(data) {
@@ -27,6 +35,7 @@ const awardDirective = {
         title: typeof data.arg === 'string' ? data.arg : 'Award',
         recipient: data.options?.recipient,
         event: data.options?.event,
+        url: data.options?.url,
         content: data.body ?? [],
       },
     ];

@@ -8,6 +8,10 @@
  * The theme loads this module in the browser after the page has rendered, so there is no space
  * held for the award: it opens vertically into place (a grid row from 0fr to 1fr), then the
  * medal pops in. Reduced-motion users get it without animation.
+ *
+ * With a `url`, the whole card is a link. A full URL opens in a new tab, marked with an arrow in
+ * the corner; a relative path is an ordinary link within the site. Links in the optional body
+ * text would then sit inside that link, so leave them out.
  */
 const CSS = `
 .cn-award {
@@ -44,6 +48,37 @@ const CSS = `
   border-color: color-mix(in oklab, var(--cn-award-gold) 35%, transparent);
   color: #fff;
   background: var(--cn-award-primary);
+}
+/* with a url, the whole card is a link */
+a.cn-award-card {
+  text-decoration: none;
+  transition: border-color 150ms, background-color 150ms;
+}
+a.cn-award-card:hover {
+  border-color: color-mix(in oklab, var(--cn-award-primary) 40%, transparent);
+  background: color-mix(in oklab, var(--cn-award-primary) 9%, #fff);
+}
+.dark a.cn-award-card:hover {
+  border-color: color-mix(in oklab, var(--cn-award-gold) 65%, transparent);
+  background: color-mix(in oklab, var(--cn-award-primary) 88%, #fff);
+}
+a.cn-award-card:focus-visible { outline: 2px solid var(--cn-award-gold); outline-offset: -2px; }
+.cn-award-external {
+  position: absolute;
+  top: 0.75rem;
+  right: 0.75rem;
+  width: 14px;
+  height: 14px;
+  color: var(--muted-foreground, #4b5563);
+}
+.dark .cn-award-external { color: rgb(255 255 255 / 0.7); }
+.cn-award-sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
 }
 /* scattered confetti on the right of the card */
 .cn-award-card::before {
@@ -181,8 +216,28 @@ export default function ASTRenderer({ React, ASTComponent }) {
     );
   }
 
+  function ExternalIcon() {
+    return h(
+      'svg',
+      { className: 'cn-award-external', viewBox: '0 0 16 16', 'aria-hidden': true },
+      h('path', {
+        d: 'M6 3h7v7M13 3 5.5 10.5M11 9.5V13H3V5h3.5',
+        fill: 'none',
+        stroke: 'currentColor',
+        strokeWidth: 1.5,
+        strokeLinecap: 'round',
+        strokeLinejoin: 'round',
+      }),
+    );
+  }
+
   function Award({ node, className }) {
     const hasContent = Array.isArray(node.content) && node.content.length > 0;
+    // a full URL (any scheme, or protocol-relative) opens in a new tab; a relative path stays in the site
+    const external = !!node.url && /^([a-z][a-z0-9+.-]*:|\/\/)/i.test(node.url);
+    const link = node.url
+      ? { href: node.url, ...(external && { target: '_blank', rel: 'noopener noreferrer' }) }
+      : null;
     return h(
       'aside',
       {
@@ -197,8 +252,9 @@ export default function ASTRenderer({ React, ASTComponent }) {
           'div',
           { className: 'cn-award-pad' },
           h(
-            'div',
-            { className: 'cn-award-card' },
+            link ? 'a' : 'div',
+            { className: 'cn-award-card', ...link },
+            external && h(ExternalIcon),
             h(
               'div',
               { className: 'cn-award-medal' },
@@ -220,6 +276,7 @@ export default function ASTRenderer({ React, ASTComponent }) {
                 ),
               hasContent &&
                 h('div', { className: 'cn-award-body' }, h(ASTComponent, { ast: node.content })),
+              external && h('span', { className: 'cn-award-sr' }, ' (opens in a new tab)'),
             ),
           ),
         ),
