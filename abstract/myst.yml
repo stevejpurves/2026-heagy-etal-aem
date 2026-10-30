@@ -59,6 +59,8 @@ project:
   numbering:
     headings: true
   bibliography: refs.bib
+  plugins:
+    - plugins/award.mjs
 site:
   template: article-theme
   actions:

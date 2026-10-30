@@ -16,6 +16,11 @@ abstract: |
   3D inversion fails to resolve.
 ---
 
+:::{award} Best Student Presentation
+:recipient: Johnathan Kuttai
+:event: AEM 2026, 9th International Airborne Electromagnetics Workshop
+:::
+
 ## Introduction
 
 Airborne electromagnetic (AEM) surveys now routinely collect tens to
